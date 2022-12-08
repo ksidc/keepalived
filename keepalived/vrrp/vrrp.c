@@ -2083,6 +2083,7 @@ vrrp_state_master_rx(vrrp_t * vrrp, const vrrphdr_t *hd, const char *buf, ssize_
 #endif
 	unsigned master_adver_int;
 	int addr_cmp;
+	bool check_addr = false;
 	vrrp_t *isync;
 
 // TODO - could we get here with wantstate == FAULT and STATE != FAULT?
@@ -2096,9 +2097,13 @@ vrrp_state_master_rx(vrrp_t * vrrp, const vrrphdr_t *hd, const char *buf, ssize_
 		vrrp->last_transition = timer_now();
 		return true;
 	}
+	
+	/* vrrp_skip_check_adv_addr option check */
+	if(!global_data->vrrp_skip_check_adv_addr)
+		check_addr = true;
 
 	/* Process the incoming packet */
-	ret = vrrp_check_packet(vrrp, hd, buf, buflen, true);
+	ret = vrrp_check_packet(vrrp, hd, buf, buflen, check_addr);
 
 	if (ret != VRRP_PACKET_OK)
 		return false;
