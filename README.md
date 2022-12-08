@@ -45,3 +45,4 @@ grant the following special exception:
 	the compilation and distribution of the Keepalived software with
 	the OpenSSL Toolkit.
 
+Add vrrp_skip_check_adv_addr config act
