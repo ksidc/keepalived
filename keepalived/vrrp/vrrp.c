@@ -1910,19 +1910,22 @@ vrrp_state_backup(vrrp_t *vrrp, const vrrphdr_t *hd, const char *buf, ssize_t bu
 	bool check_addr = false;
 	timeval_t new_ms_down_timer;
 	bool ignore_advert = false;
-
-	/* Process the incoming packet */
-	if (!__test_bit(VRRP_FLAG_SKIP_CHECK_ADV_ADDR, &vrrp->flags) ||
-	    vrrp->master_saddr.ss_family != vrrp->pkt_saddr.ss_family)
-		check_addr = true;
-	else {
-		/* Check if the addresses are different */
-		if (vrrp->pkt_saddr.ss_family == AF_INET) {
-			if (PTR_CAST(struct sockaddr_in, &vrrp->pkt_saddr)->sin_addr.s_addr != PTR_CAST(struct sockaddr_in, &vrrp->master_saddr)->sin_addr.s_addr)
-				check_addr = true ;
-		} else {
-			if (!IN6_ARE_ADDR_EQUAL(&PTR_CAST(struct sockaddr_in6, &vrrp->pkt_saddr)->sin6_addr, &PTR_CAST(struct sockaddr_in6, &vrrp->master_saddr)->sin6_addr))
-				check_addr = true;
+	
+	/* check vrrp_skip_check_adv_addr config option */
+	if(!global_data->vrrp_skip_check_adv_addr){
+		/* Process the incoming packet */
+		if (!__test_bit(VRRP_FLAG_SKIP_CHECK_ADV_ADDR, &vrrp->flags) ||
+		    vrrp->master_saddr.ss_family != vrrp->pkt_saddr.ss_family)
+			check_addr = true;
+		else {
+			/* Check if the addresses are different */
+			if (vrrp->pkt_saddr.ss_family == AF_INET) {
+				if (PTR_CAST(struct sockaddr_in, &vrrp->pkt_saddr)->sin_addr.s_addr != PTR_CAST(struct sockaddr_in, &vrrp->master_saddr)->sin_addr.s_addr)
+					check_addr = true ;
+			} else {
+				if (!IN6_ARE_ADDR_EQUAL(&PTR_CAST(struct sockaddr_in6, &vrrp->pkt_saddr)->sin6_addr, &PTR_CAST(struct sockaddr_in6, &vrrp->master_saddr)->sin6_addr))
+					check_addr = true;
+			}
 		}
 	}
 	ret = vrrp_check_packet(vrrp, hd, buf, buflen, check_addr);
